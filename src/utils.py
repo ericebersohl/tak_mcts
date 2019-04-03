@@ -4,6 +4,8 @@ class InvalidMoveError(Exception):
 
 initial_state = {
     'to_move': 'w',
+    'w_stones': 10,
+    'b_stones': 10,
     'board': [
         [[], [], [], []],
         [[], [], [], []],
