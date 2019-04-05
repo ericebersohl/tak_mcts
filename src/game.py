@@ -117,7 +117,61 @@ def validate_action(state: State, action: Action, debug: bool = False) -> bool:
     return True
 
 def get_next_state(state: State, action: Action) -> State:
-    pass
+    if not validate_action(state, action):
+        raise RuntimeError('Action failed validation.')
+    
+    # color
+    if state.to_move == Color.BLACK:
+        to_move = Color.WHITE
+    else:
+        to_move = Color.BLACK
+
+    # stones
+    if isinstance(action, Place):
+        if state.to_move == Color.BLACK:
+            white_stones = state.white_stones
+            black_stones = state.black_stones - 1
+        else: # to_move == WHITE
+            white_stones = state.white_stones - 1
+            black_stones = state.black_stones
+    else:
+        white_stones, black_stones = state.white_stones, state.black_stones
+
+    # board
+    board: List[List[List[Piece]]] = state.board
+    
+    if isinstance(action, Place):
+        board[action.coord[0]][action.coord[1]].append(action.piece)
+    else:
+        row, col = action.start_coord[0], action.start_coord[1]
+        row_end, col_end = action.end_coord[0], action.end_coord[1]
+
+        # split the stack
+        stack = board[row][col]
+        moved = stack[-action.carry_size:]
+        board[row][col] = stack[:action.carry_size]
+
+        # get direction, move stones
+        if abs(row_end - row) > abs(col_end - col):
+            direction = ( row_end - row ) // len(action.drop_list)
+            for step in range(1, len(action.drop_list) + 1):
+                drop = moved[action.drop_list[step - 1]:]
+                del moved[:action.drop_list[step - 1]]
+                board[row + (step * direction)][col].extend(drop)
+        else:
+            direction = ( col_end - col ) // len(action.drop_list)
+            for step in range(1, len(action.drop_list) + 1):
+                drop = moved[action.drop_list[step - 1]:]
+                del moved[:action.drop_list[step - 1]]
+                board[row][col + (step * direction)].extend(drop)
+
+
+    return State(
+        to_move = to_move,
+        white_stones = white_stones,
+        black_stones = black_stones,
+        board = board,
+    )
 
 def get_actions(state: Dict) -> List[Action]:
     pass
