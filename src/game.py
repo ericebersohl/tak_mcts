@@ -3,7 +3,7 @@ from typing import Dict, List, Union, NamedTuple, Tuple
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
 
-def validate_move(state: State, action: Action, debug: bool = False) -> bool:
+def validate_action(state: State, action: Action, debug: bool = False) -> bool:
     if isinstance(action, Move):
 
         # variables
