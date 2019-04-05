@@ -5,7 +5,7 @@ class Color(Enum):
     WHITE = 'w'
 
 class Piece(Enum):
-    BLACK_FLAT = 'bf'
-    BLACK_STANDING = 'bs'
-    WHITE_FLAT = 'wf'
-    WHITE_STANDING = 'ws'
+    BLACK_FLAT = Color.BLACK
+    BLACK_STANDING = Color.BLACK
+    WHITE_FLAT = Color.WHITE
+    WHITE_STANDING = Color.WHITE
