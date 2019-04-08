@@ -25,7 +25,7 @@ def validate_action(state: State, action: Action, debug: bool = False) -> bool:
         start_square = state.board[row_s][col_s]
 
         # player has control
-        if len(start_square) == 0 or start_square[-1].value != state.to_move:
+        if len(start_square) == 0 or start_square[-1].value['color'] != state.to_move:
             if debug: print(f'Player does not have control of ( {row_s} , {col_s} ).')
             return False
 
@@ -110,13 +110,14 @@ def validate_action(state: State, action: Action, debug: bool = False) -> bool:
             return False
 
         # colors agree
-        if state.to_move != action.piece.value:
-            if debug: print(f'Colors do not match: {state.to_move} vs {action.piece.value}.')
+        piece_color = action.piece.value['color']
+        if state.to_move != piece_color:
+            if debug: print(f'Colors do not match: {state.to_move} vs {piece_color}.')
             return False
     
     return True
 
-def get_next_state(state: State, action: Action) -> State:
+def get_next_state(state: State, action: Action) -> State:    
     if not validate_action(state, action):
         raise RuntimeError('Action failed validation.')
     
@@ -147,21 +148,21 @@ def get_next_state(state: State, action: Action) -> State:
         row_end, col_end = action.end_coord[0], action.end_coord[1]
 
         # split the stack
-        stack = board[row][col]
-        moved = stack[-action.carry_size:]
-        board[row][col] = stack[:action.carry_size]
+        stack: List[Piece] = board[row][col]
+        remain, moved = split_stack(stack, action.carry_size)
+        board[row][col] = remain
 
         # get direction, move stones
         if abs(row_end - row) > abs(col_end - col):
             direction = ( row_end - row ) // len(action.drop_list)
             for step in range(1, len(action.drop_list) + 1):
-                drop = moved[action.drop_list[step - 1]:]
+                drop = moved[:action.drop_list[step - 1]]
                 del moved[:action.drop_list[step - 1]]
                 board[row + (step * direction)][col].extend(drop)
         else:
             direction = ( col_end - col ) // len(action.drop_list)
             for step in range(1, len(action.drop_list) + 1):
-                drop = moved[action.drop_list[step - 1]:]
+                drop = moved[:action.drop_list[step - 1]]
                 del moved[:action.drop_list[step - 1]]
                 board[row][col + (step * direction)].extend(drop)
 
@@ -181,3 +182,18 @@ def simulate(state: Dict) -> bool:
 
 def check_victory(state: Dict) -> bool:
     pass
+
+#
+#   UTILITY
+#
+
+def split_stack(stack: List, num_removed: int) -> Tuple[List, List]:
+    if num_removed > len(stack) or num_removed < 1:
+        raise RuntimeError("num_removed out of bounds")
+    
+    split_index = len(stack) - num_removed
+
+    picked_up = stack[split_index:]
+    remaining = stack[:split_index]
+
+    return ( remaining, picked_up )

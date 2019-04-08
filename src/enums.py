@@ -1,11 +1,23 @@
-from enum import Enum
+from enum import Enum, auto
 
 class Color(Enum):
-    BLACK = 'b'
-    WHITE = 'w'
+    BLACK = auto()
+    WHITE = auto()
 
 class Piece(Enum):
-    BLACK_FLAT = Color.BLACK
-    BLACK_STANDING = Color.BLACK
-    WHITE_FLAT = Color.WHITE
-    WHITE_STANDING = Color.WHITE
+    BLACK_FLAT = {
+        'type' : 'flat',
+        'color': Color.BLACK,
+    }
+    BLACK_STANDING = {
+        'type' : 'standing',
+        'color': Color.BLACK,
+    }
+    WHITE_FLAT = {
+        'type' : 'flat',
+        'color': Color.WHITE,
+    }
+    WHITE_STANDING = {
+        'type' : 'standing',
+        'color': Color.WHITE,
+    }
