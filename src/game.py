@@ -1,4 +1,5 @@
 from typing import Dict, List, Union, NamedTuple, Tuple
+from itertools import permutations
 
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
@@ -174,8 +175,56 @@ def get_next_state(state: State, action: Action) -> State:
         board = board,
     )
 
-def get_actions(state: Dict) -> List[Action]:
-    pass
+def get_actions(state: State) -> List[Action]:
+    action_list: List[Action] = []
+    
+    if state.white_stones == 0 or state.black_stones == 0:
+        raise RuntimeError("get_actions called when a player has no stones.")
+
+    # append all possible actions
+    board = state.board
+    if state.to_move == Color.WHITE:
+        available_pieces = [
+            Piece.WHITE_FLAT,
+            Piece.WHITE_STANDING,
+        ]
+    else:
+        available_pieces = [
+            Piece.BLACK_FLAT,
+            Piece.BLACK_STANDING,
+        ]
+
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            
+            # possible placements
+            if len(board[row][col]) == 0:
+                action_list.extend([
+                    Place(coord = (row, col), piece = available_pieces[0]),
+                    Place(coord = (row, col), piece = available_pieces[1]),
+                ])
+
+            # possible movements
+            elif len(board[row][col]) > 0 and board[row][col][-1].value['color'] == state.to_move:
+                directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+                max_carry_size = min(4, len(board[row][col]))
+                # directions
+                for direction in directions:
+                    # carry sizes
+                    for carry in range(1, max_carry_size + 1):
+                        # endpoints
+                        for moves in range(1, carry + 1):
+                            drop_lists = get_drop_lists(carry, moves)
+                            # drop lists
+                            for drop in drop_lists:
+                                action_list.append(Move(
+                                    start_coord = (row, col),
+                                    end_coord = (row + direction[0] * moves, col + direction[1] * moves),
+                                    carry_size = carry,
+                                    drop_list = drop,
+                                ))
+
+    return [action for action in action_list if validate_action(state, action)]
 
 def simulate(state: Dict) -> bool:
     pass
@@ -197,3 +246,35 @@ def split_stack(stack: List, num_removed: int) -> Tuple[List, List]:
     remaining = stack[:split_index]
 
     return ( remaining, picked_up )
+
+def get_combinations(candidates: List[int], target: int):
+    combinations: List = []
+    get_combinations_rec(candidates, target, 0, 0, [], combinations)
+    return combinations
+    
+def get_combinations_rec(candidates, target, index, sum, listT, combinations):
+    """
+    Adapted from https://wlcoding.blogspot.com/2015/03/combination-sum-i-ii.html
+    """
+    if sum == target:
+        combinations.append(list(listT))
+    for i in range(index,len(candidates)):
+        if sum + candidates[i] > target:
+            break
+        listT.append(candidates[i])
+        get_combinations_rec(candidates, target, i, sum+candidates[i], listT, combinations)
+        listT.pop()
+
+def get_drop_lists(carry: int, moves: int):
+    possible_drops = list(range(1, carry + 1))
+    all_combinations = get_combinations(possible_drops, carry)
+    combinations = [x for x in all_combinations if len(x) == moves]
+
+    perms = []
+    for c in combinations:
+        for p in permutations(c):
+            perms.append(p)
+
+    solution = [list(x) for x in set(perms)]
+
+    return solution
