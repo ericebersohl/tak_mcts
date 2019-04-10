@@ -394,7 +394,7 @@ def simulate(state: State) -> bool:
 
     final = check_victory(state)
     print_state(state)
-    print('check_for_victory: ', final)
+    print('check_for_victory: ', final[1])
 
     if final[1] == Color.BLACK:
         return True

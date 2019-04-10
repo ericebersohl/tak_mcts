@@ -204,5 +204,9 @@ def print_state(state: State) -> None:
     print('Board:')
 
     for row in range(4):
-        print(f'{get_list_str(state.board[row][0])} {get_list_str(state.board[row][1])}\
-                {get_list_str(state.board[row][2])} {get_list_str(state.board[row][3])}')
+        print(
+            f'{get_list_str(state.board[row][0])} '
+            f'{get_list_str(state.board[row][1])} '
+            f'{get_list_str(state.board[row][2])} '
+            f'{get_list_str(state.board[row][3])}'
+        )
