@@ -2,37 +2,11 @@ import unittest
 import env
 import pprint as pp
 
-from src.game import get_drop_lists, get_actions
+from src.game import get_actions
 from src.types import State, Place, Move
 from src.enums import Piece, Color
 
 class TestGetActions(unittest.TestCase):
-    def test_get_drop_lists(self):
-        carry = 1
-        moves = 1
-        self.assertEqual(get_drop_lists(carry, moves), [[1]])
-
-        carry = 2
-        moves = 1
-        self.assertEqual(get_drop_lists(carry, moves), [[2]])
-
-        carry = 2
-        moves = 2
-        self.assertEqual(get_drop_lists(carry, moves), [[1, 1]])
-
-        carry = 3
-        moves = 2
-        self.assertEqual(get_drop_lists(carry, moves), [[1, 2], [2, 1]])
-
-        carry = 6
-        moves = 3
-        self.assertEqual(get_drop_lists(carry, moves), [
-            [2, 2, 2], [3, 1, 2], [1, 3, 2],
-            [3, 2, 1], [2, 1, 3], [1, 4, 1],
-            [2, 3, 1], [1, 2, 3], [4, 1, 1],
-            [1, 1, 4],
-        ])
-
     def test_get_actions(self):
         expected = [
             Place(coord = (0, 0), piece = Piece.WHITE_FLAT),

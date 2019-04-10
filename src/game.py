@@ -3,6 +3,7 @@ from itertools import permutations
 
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
+from .utils import *
 
 def validate_action(state: State, action: Action, debug: bool = False) -> bool:
     if isinstance(action, Move):
@@ -229,52 +230,43 @@ def get_actions(state: State) -> List[Action]:
 def simulate(state: Dict) -> bool:
     pass
 
-def check_victory(state: Dict) -> bool:
-    pass
-
-#
-#   UTILITY
-#
-
-def split_stack(stack: List, num_removed: int) -> Tuple[List, List]:
-    if num_removed > len(stack) or num_removed < 1:
-        raise RuntimeError("num_removed out of bounds")
+def check_victory(state: State) -> Tuple[bool, Union[Color, str]]:
+    board = state.board
+    open_squares = 0
     
-    split_index = len(stack) - num_removed
+    if state.to_move == Color.BLACK:
+        not_to_move = Color.WHITE
+    else:
+        not_to_move = Color.BLACK
 
-    picked_up = stack[split_index:]
-    remaining = stack[:split_index]
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            if len(board[row][col]) == 0:
+                open_squares += 1
 
-    return ( remaining, picked_up )
+    if state.white_stones < 1 or state.black_stones < 1 or open_squares == 0:
+        # count flats
+        white_flats, black_flats = 0, 0
+        for row in range(len(board)):
+            for col in range(len(board[row])):
+                if len(board[row][col]) > 0 and board[row][col][-1] == Piece.WHITE_FLAT:
+                    white_flats += 1
+                elif len(board[row][col]) > 0 and board[row][col][-1] == Piece.BLACK_FLAT:
+                    black_flats += 1
+        
+        if white_flats == black_flats:
+            return (True, 'Draw')
+        elif white_flats > black_flats:
+            return (True, Color.WHITE)
+        else:
+            return (True, Color.BLACK)
 
-def get_combinations(candidates: List[int], target: int):
-    combinations: List = []
-    get_combinations_rec(candidates, target, 0, 0, [], combinations)
-    return combinations
-    
-def get_combinations_rec(candidates, target, index, sum, listT, combinations):
-    """
-    Adapted from https://wlcoding.blogspot.com/2015/03/combination-sum-i-ii.html
-    """
-    if sum == target:
-        combinations.append(list(listT))
-    for i in range(index,len(candidates)):
-        if sum + candidates[i] > target:
-            break
-        listT.append(candidates[i])
-        get_combinations_rec(candidates, target, i, sum+candidates[i], listT, combinations)
-        listT.pop()
-
-def get_drop_lists(carry: int, moves: int):
-    possible_drops = list(range(1, carry + 1))
-    all_combinations = get_combinations(possible_drops, carry)
-    combinations = [x for x in all_combinations if len(x) == moves]
-
-    perms = []
-    for c in combinations:
-        for p in permutations(c):
-            perms.append(p)
-
-    solution = [list(x) for x in set(perms)]
-
-    return solution
+    paths = get_path(state)
+    if paths == (True, False):
+        return (True, Color.BLACK)
+    elif paths == (False, True):
+        return (True, Color.WHITE)
+    elif paths == (True, True):
+        return (True, not_to_move)
+    else:
+        return (False, Color.BLACK)

@@ -7,35 +7,6 @@ from src.types import State, Place, Move
 
 class TestGetNextState(unittest.TestCase):
 
-    def test_split_stack(self):
-        a = ['a', 'b', 'c', 'd', 'e', 'f']
-        b = []
-        c = ['a']
-
-        expected_1 = ['a', 'b', 'c']
-        expected_2 = ['d', 'e', 'f']
-        actual_1, actual_2 = split_stack(a, 3)
-        self.assertEqual(actual_1, expected_1)
-        self.assertEqual(actual_2, expected_2)
-
-        expected_1 = []
-        expected_2 = ['a']
-        actual_1, actual_2 = split_stack(c, 1)
-        self.assertEqual(actual_1, expected_1)
-        self.assertEqual(actual_2, expected_2)
-
-        expected_1 = []
-        expected_2 = ['a', 'b', 'c', 'd', 'e', 'f']
-        actual_1, actual_2 = split_stack(a, 6)
-        self.assertEqual(actual_1, expected_1)
-        self.assertEqual(actual_2, expected_2)
-        
-        with self.assertRaises(RuntimeError):
-            split_stack(a, 0)
-        
-        with self.assertRaises(RuntimeError):
-            split_stack(b, 1)
-
     def test_place(self):
         place_1 = Place(
             coord = (1, 2),
