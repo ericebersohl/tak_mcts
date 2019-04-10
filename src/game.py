@@ -1,5 +1,6 @@
 from typing import Dict, List, Union, NamedTuple, Tuple
 from itertools import permutations
+from random import choice
 
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
@@ -180,7 +181,7 @@ def get_actions(state: State) -> List[Action]:
     action_list: List[Action] = []
     
     if state.white_stones == 0 or state.black_stones == 0:
-        raise RuntimeError("get_actions called when a player has no stones.")
+        raise RuntimeError(f"get_actions called when a player has no stones {state}.")
 
     # append all possible actions
     board = state.board
@@ -227,10 +228,8 @@ def get_actions(state: State) -> List[Action]:
 
     return [action for action in action_list if validate_action(state, action)]
 
-def simulate(state: Dict) -> bool:
-    pass
-
 def check_victory(state: State) -> Tuple[bool, Union[Color, str]]:
+
     board = state.board
     open_squares = 0
     
@@ -270,3 +269,25 @@ def check_victory(state: State) -> Tuple[bool, Union[Color, str]]:
         return (True, not_to_move)
     else:
         return (False, Color.BLACK)
+
+def simulate(state: State) -> bool:
+    n = 0
+
+    while n < 1000:
+        if check_victory(state)[0]:
+            break
+        available_actions = get_actions(state)
+        action = choice(available_actions)
+        state = get_next_state(state, action)
+        n += 1
+    
+    final = check_victory(state)
+    print_state(state)
+    print('check_for_victory: ', final)
+    
+    if final[1] == Color.BLACK:
+        return True
+    elif final[1] == Color.WHITE:
+        return False
+    else: # Draw or Inconclusive
+        return choice([True, False])

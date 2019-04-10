@@ -97,3 +97,25 @@ def get_controlled(board: List[List[List[Piece]]], coord: Tuple[int, int], color
         return True
     else:
         return False
+
+def print_state(state: State) -> None:
+    print('To Move:\t', state.to_move.value, sep='')
+    print('White Stones:\t', state.white_stones, sep='')
+    print('Black Stones:\t', state.black_stones, sep='')
+    print('Board:')
+    
+    for row in range(4):
+        print(f'{get_list_str(state.board[row][0])} {get_list_str(state.board[row][1])} {get_list_str(state.board[row][2])} {get_list_str(state.board[row][3])}')
+
+def get_list_str(square: List[Piece]) -> str:
+    s = [x.value['str'] for x in square]
+    if len(square) == 0:
+        return f'[          ]'
+    elif len(square) == 1:
+        return f'[        {s[-1]}]'
+    elif len(square) == 2:
+        return f'[    {s[-2]}, {s[-1]}]'
+    elif len(square) == 3:
+        return f'[{s[-3]}, {s[-2]}, {s[-1]}]'
+    else: # len(square) > 3:
+        return f'[({len(square)-2:02d}){s[-2]}, {s[-1]}]'
