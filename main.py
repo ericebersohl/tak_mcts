@@ -1,17 +1,24 @@
 from src.game import *
 from src.types import State
 from src.utils import print_state
+from src.node import Node
+from src.search import mcts
+
+bf = Piece.BLACK_FLAT
+bs = Piece.BLACK_STANDING
+wf = Piece.WHITE_FLAT
+ws = Piece.WHITE_STANDING
 
 initial_state = State(
     to_move = Color.BLACK,
-    black_stones = 15,
-    white_stones = 15,
+    black_stones = 12,
+    white_stones = 12,
     board = [
-        [[], [], [], []],
-        [[], [], [], []],
-        [[], [], [], []],
-        [[], [], [], []],
+        [[wf], [wf], [wf], []],
+        [[], [], [], [bf]],
+        [[], [], [], [bf]],
+        [[], [], [], [bf]],
     ]
 )
 
-simulate(initial_state)
+mcts(initial_state, 1000)

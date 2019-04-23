@@ -4,16 +4,15 @@ This module contains five functions:
     validate_action(state, action) -> bool
     get_next_state(state, action) -> State
     get_actions(state) -> List[Action]
-    check_victory(state) -> Tuple[bool, Union[Color, str]]
-    simulate(state) -> bool
+    check_victory(state) -> Union[None, Tuple[float, float]]
+    simulate(state) -> Tuple[float, float]
 
     Validate_action returns true if the proposed action is valid for the given state.
     Get_next_state returns the new (immutable) state that results from applying the passed action
     to the passed state.  Get_actions returns a list of all possible actions for a given state.
-    Check_victory returns a bool that is True if the game is over and either a Color to designate
-    the winner or the string 'Draw' to designate a draw.  Simulate runs a game from the current
-    state to an end state choosing all actions randomly.  This is used for the standard
-    implementation of a Monte-Carlo Tree Search algorithm.
+    Check_victory if the state is terminal, returns a tuple indicating which player won.
+    Simulate runs a game from the current state to an end state choosing all actions randomly.
+    This is used for the standard implementation of a Monte-Carlo Tree Search algorithm.
 """
 from typing import List, Union, Tuple
 from random import choice
@@ -62,7 +61,7 @@ def validate_action(state: State, action: Action, debug: bool = False) -> bool:
         # player has control
         if not start_square or start_square[-1].value['color'] != state.to_move:
             if debug:
-                print(f'Player does not have control of ( {row_s} , {col_s} ).')
+                print(f'Player {state.to_move.value} does not have control of ( {row_s} , {col_s} ).')
             return False
 
         # stack size limit
@@ -312,7 +311,7 @@ def get_actions(state: State) -> List[Action]:
 
     return [action for action in action_list if validate_action(state, action)]
 
-def check_victory(state: State) -> Tuple[bool, Union[Color, str]]:
+def check_victory(state: State) -> Union[None, Tuple[float, float]]:
     """Determines whether the passed state is terminal.
 
     This function determines if the game has reached a terminal state.
@@ -325,25 +324,23 @@ def check_victory(state: State) -> Tuple[bool, Union[Color, str]]:
         state: An immutable State object (NamedTuple) containing board state information.
 
     Returns:
-        A tuple containing a bool and either a Color or a string.  The bool is True if this is a
-        terminal state (meaning a player won or it is a draw).  The second tuple element signifies
-        which player won by returning their Color OR the string 'Draw' if the game ended in a draw.
+        If the state is non-terminal, None is returned.  If it is terminal, a Tuple of floats is
+        returned indicating the result:
+            (1.0, 0.0): Black victory
+            (0.0, 1.0): White Victory
+            (0.5, 0.5): Draw
     """
     board = state.board
     open_squares = 0
 
-    if state.to_move == Color.BLACK:
-        not_to_move = Color.WHITE
-    else:
-        not_to_move = Color.BLACK
-
+    # count open squares
     for row in range(len(board)):
         for col in range(len(board[row])):
             if not board[row][col]:
                 open_squares += 1
 
+    # count flat pieces
     if state.white_stones < 1 or state.black_stones < 1 or open_squares == 0:
-        # count flats
         white_flats, black_flats = 0, 0
         for row in range(len(board)):
             for col in range(len(board[row])):
@@ -353,52 +350,48 @@ def check_victory(state: State) -> Tuple[bool, Union[Color, str]]:
                     black_flats += 1
 
         if white_flats == black_flats:
-            return (True, 'Draw')
+            return (0.5, 0.5)
         if white_flats > black_flats:
-            return (True, Color.WHITE)
+            return (0.0, 1.0)
         if white_flats < black_flats:
-            return (True, Color.BLACK)
+            return (1.0, 0.0)
 
     paths = get_path(state)
     if paths == (True, False):
-        return (True, Color.BLACK)
+        return (1.0, 0.0)
     if paths == (False, True):
-        return (True, Color.WHITE)
-    if paths == (True, True):
-        return (True, not_to_move)
+        return (0.0, 1.0)
+    if paths == (True, True) and state.to_move == Color.WHITE:
+        return (1.0, 0.0)
+    if paths == (True, True) and state.to_move == Color.BLACK:
+        return (0.0, 1.0)
 
-    # Color is only included for typing
-    return (False, Color.BLACK)
+    return None
 
-def simulate(state: State) -> bool:
+def simulate(input_state: State) -> Tuple[float, float]:
     """Simulates a game run from the current state to a (random) terminal state.
 
     Args:
         state: An immutable State object (NamedTuple) containing board state information.
 
     Returns:
-        A bool that is True if the Black player won and False if the White player won.  In the event
-        of a draw, or an interminable game (>1000 turns), the winning player is chosen randomly.
-        This is because the standard implementation of a Monte-Carlo Tree Search does not have a
-        straightforward way to implement draws.
+        A tuple containing the result for each player.
     """
     num_moves = 0
+    state = input_state._replace()
 
     while num_moves < 1000:
-        if check_victory(state)[0]:
+        if check_victory(state) is not None:
             break
         available_actions = get_actions(state)
         action = choice(available_actions)
         state = get_next_state(state, action)
         num_moves += 1
-
-    final = check_victory(state)
-    print_state(state)
-    print('check_for_victory: ', final[1])
-
-    if final[1] == Color.BLACK:
-        return True
-    if final[1] == Color.WHITE:
-        return False
-
-    return choice([True, False])
+    
+    # typing workaround, currently no good way to unwrap an optional type
+    if check_victory(state) == (1.0, 0.0):
+        return (1.0, 0.0)
+    if check_victory(state) == (0.0, 1.0):
+        return (0.0, 1.0)
+    
+    return (0.5, 0.5)

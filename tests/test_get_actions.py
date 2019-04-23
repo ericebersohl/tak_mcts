@@ -1,5 +1,5 @@
 import unittest
-import env
+import tests.env
 import pprint as pp
 
 from src.game import get_actions
@@ -104,7 +104,6 @@ class TestGetActions(unittest.TestCase):
 
         ws = Piece.WHITE_STANDING
         wf = Piece.WHITE_FLAT
-        bs = Piece.BLACK_STANDING
         bf = Piece.BLACK_FLAT
 
         self.test_state_1 = State(

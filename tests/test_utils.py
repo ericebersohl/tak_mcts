@@ -1,7 +1,7 @@
 import unittest
-import env
+import tests.env
 
-from src.utils import *
+from src.utils import split_stack, get_drop_lists, get_controlled, bfs, get_path
 from src.types import State
 from src.enums import Color, Piece
 
