@@ -89,28 +89,28 @@ class TestCheckVictory(unittest.TestCase):
     def test_check_victory(self):
         # full board
         state = self.full_state
-        self.assertEqual((True, 'Draw'), check_victory(state))
+        self.assertEqual((0.5, 0.5), check_victory(state))
 
         # white stones == 0
         state = self.stones_1
-        self.assertEqual((True, Color.WHITE), check_victory(state))
+        self.assertEqual((0.0, 1.0), check_victory(state))
 
         # black stones == 0
         state = self.stones_2
-        self.assertEqual((True, Color.BLACK), check_victory(state))
+        self.assertEqual((1.0, 0.0), check_victory(state))
 
         # white path
         state = self.path_1
-        self.assertEqual((True, Color.WHITE), check_victory(state))
+        self.assertEqual((0.0, 1.0), check_victory(state))
         
         # black path
         state = self.path_2
-        self.assertEqual((True, Color.BLACK), check_victory(state))
+        self.assertEqual((1.0, 0.0), check_victory(state))
         
         # dual paths
         state = self.path_3
-        self.assertEqual((True, Color.WHITE), check_victory(state))
+        self.assertEqual((0.0, 1.0), check_victory(state))
 
         # no victory
         state = self.no_victory
-        self.assertEqual((False, Color.BLACK), check_victory(state))
+        self.assertEqual(None, check_victory(state))

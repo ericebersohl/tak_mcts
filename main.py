@@ -13,5 +13,6 @@ initial_state = State(
         [[], [], [], []],
     ]
 )
-
-simulate(initial_state)
+print_state(initial_state)
+print_state(simulate(initial_state))
+print_state(initial_state)
