@@ -14,8 +14,9 @@ This module contains five functions:
     Simulate runs a game from the current state to an end state choosing all actions randomly.
     This is used for the standard implementation of a Monte-Carlo Tree Search algorithm.
 """
+import copy
+import random
 from typing import List, Union, Tuple
-from random import choice
 
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
@@ -324,16 +325,12 @@ def check_victory(state: State) -> Union[None, Tuple[float, float]]:
         state: An immutable State object (NamedTuple) containing board state information.
 
     Returns:
-        If the state is non-terminal, None is returned.  If it is terminal, a Tuple of floats is
-        returned indicating the result:
-            (1.0, 0.0): Black victory
-            (0.0, 1.0): White Victory
-            (0.5, 0.5): Draw
+        A tuple of floats containing the score for each player: (Black, White).  If the state
+        is not terminal, returns None.
     """
     board = state.board
     open_squares = 0
 
-    # count open squares
     for row in range(len(board)):
         for col in range(len(board[row])):
             if not board[row][col]:
@@ -361,37 +358,26 @@ def check_victory(state: State) -> Union[None, Tuple[float, float]]:
         return (1.0, 0.0)
     if paths == (False, True):
         return (0.0, 1.0)
-    if paths == (True, True) and state.to_move == Color.WHITE:
-        return (1.0, 0.0)
     if paths == (True, True) and state.to_move == Color.BLACK:
         return (0.0, 1.0)
+    if paths == (True, True) and state.to_move == Color.WHITE:
+        return (1.0, 0.0)
 
     return None
 
-def simulate(input_state: State) -> Tuple[float, float]:
+def simulate(start_state: State) -> State:
     """Simulates a game run from the current state to a (random) terminal state.
 
     Args:
         state: An immutable State object (NamedTuple) containing board state information.
 
     Returns:
-        A tuple containing the result for each player.
+        The terminal state reached.
     """
-    num_moves = 0
-    state = input_state._replace()
+    end_state: State = copy.deepcopy(start_state)
 
-    while num_moves < 1000:
-        if check_victory(state) is not None:
-            break
-        available_actions = get_actions(state)
-        action = choice(available_actions)
-        state = get_next_state(state, action)
-        num_moves += 1
+    while not check_victory(end_state):
+        end_state = get_next_state(end_state, random.choice(get_actions(end_state)))
+
+    return end_state
     
-    # typing workaround, currently no good way to unwrap an optional type
-    if check_victory(state) == (1.0, 0.0):
-        return (1.0, 0.0)
-    if check_victory(state) == (0.0, 1.0):
-        return (0.0, 1.0)
-    
-    return (0.5, 0.5)

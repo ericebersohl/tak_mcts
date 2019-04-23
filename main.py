@@ -20,5 +20,6 @@ initial_state = State(
         [[], [], [], [bf]],
     ]
 )
-
-mcts(initial_state, 1000)
+print_state(initial_state)
+print_state(simulate(initial_state))
+print_state(initial_state)
