@@ -1,22 +1,28 @@
+"""Functions for Monte-Carlo Tree Searches.
+
+TODO: add more info about what an mcts is.
+
+There is currently only one version of MCTS which is the default.
+"""
 import random
-from typing import Tuple
-import pprint
 import copy
-import pdb
 
 from .node import Node
 from .types import State, Action
-from .game import simulate, validate_action, get_next_state, check_victory, get_actions
-from .utils import print_state, get_action_string
+from .game import get_next_state, check_victory, get_actions
 
-def mcts(root: State, iterations: int) -> Action:
-    root_node: Node = Node(action = None, state = root, parent = None)
+def default_mcts(root: State, iterations: int) -> Action:
+    """Returns the most visited action from a MCTS with the given number of iterations.
 
-    for i in range(iterations):
-        # pdb.set_trace()
+    Args:
+        root: a State NamedTuple that represents the current game state from which to simulate.
+        iterations: the number of iterations to run before selecting an action.
+    """
+    root_node: Node = Node(action=None, state=root, parent=None)
+
+    for _ in range(iterations):
         current_node: Node = root_node
-        state = root_node.state._replace()
-        print(i)
+        state = copy.deepcopy(root_node.state)
 
         # Select
         while not current_node.unexplored and current_node.children:  # fully expanded, non-terminal
@@ -32,7 +38,7 @@ def mcts(root: State, iterations: int) -> Action:
         # Simulate
         while check_victory(state) is None:
             state = get_next_state(state, random.choice(get_actions(state)))
-        
+
         # typing workaround, currently no good way to unwrap an optional type
         if check_victory(state) == (1.0, 0.0):
             result = (1.0, 0.0)
@@ -46,4 +52,4 @@ def mcts(root: State, iterations: int) -> Action:
             current_node.update_node(result)
             current_node = current_node.parent
 
-    return sorted(root_node.children, key = lambda x: x.visits)[-1].action
+    return sorted(root_node.children, key=lambda x: x.visits)[-1].action

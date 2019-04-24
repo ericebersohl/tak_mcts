@@ -1,7 +1,18 @@
 """Class for Nodes in a MCTS tree.
 
+A node represents a specific action taken in the game being simulated.  It stores a record of wins
+and attempts that pass through that action, and it uses that information to give itself a weight
+that signifies its attractiveness for exploration.
+
 The Node class contains several methods:
-    ...
+    calculate_uct: calculates the "exploration-attractiveness" of the node based on its wins and
+    visits.
+    select_child: returns the child with the highest UCT weight
+    add_child: adds a child node in the tree
+    update_node: updates the wins and visits properties of the node given a result from a simulated
+    game.
+    get_random_action: returns a random action from the list of unexplored actions.
+    tree_to_string: prints a representation of the subtree that has this node as its root.
 
 Adapted from: http://mcts.ai/code/python.html
 """
@@ -13,11 +24,13 @@ import random
 
 from .types import Action, State
 from .enums import Color
-from .game import get_actions, get_next_state
+from .game import get_actions
 from .utils import get_action_string
 
 class Node:
+    """Represents a node in a Monte-Carlo Tree Search."""
     def __init__(self, action: Union[Action, None], state: State, parent: Union[Node, None]):
+        """Initializes a node.  Gets a list of possible actions from this state."""
         self._action = action
         self._state = state
         self._parent = parent
@@ -28,7 +41,7 @@ class Node:
 
     def calculate_uct(self, child_wins: int, child_visits: int, weight: float = 1.0) -> float:
         """Returns a float that represents its attractiveness for MCTS exploration
-        
+
         Note that if the node's _visits property is 0, float("inf") is returned.
 
         Args:
@@ -38,7 +51,7 @@ class Node:
 
         Raises:
             ValueError:
-                child_visits < 1 
+                child_visits < 1
                 self._visits < child_visits
                 child_wins > child_visits
         """
@@ -48,7 +61,7 @@ class Node:
         if self._visits < child_visits:
             raise ValueError(f"child_visits cannot be greater than parent._visits:\
                                {child_visits} > {self._visits}.")
-        
+
         if child_wins > child_visits:
             raise ValueError(f"child_visits cannot be greater than child_wins:\
                                {child_visits} > {child_wins}")
@@ -68,7 +81,7 @@ class Node:
         Uses the calculate_uct function on each Node in self._children.
         """
         best_child: Node = sorted(
-            self._children, key = lambda child: self.calculate_uct(child.wins, child.visits)
+            self._children, key=lambda child: self.calculate_uct(child.wins, child.visits)
         )[-1]
         return best_child
 
@@ -102,34 +115,6 @@ class Node:
     def get_random_action(self) -> Action:
         """Returns a random member of _unexplored."""
         return random.choice(self._unexplored)
-    
-    @property
-    def wins(self):
-        return self._wins
-
-    @property
-    def visits(self):
-        return self._visits
-
-    @property
-    def unexplored(self):
-        return self._unexplored
-
-    @property
-    def state(self):
-        return self._state
-    
-    @property
-    def children(self):
-        return self._children
-    
-    @property
-    def parent(self):
-        return self._parent
-
-    @property
-    def action(self):
-        return self._action
 
     def __repr__(self):
         if self._action is not None:
@@ -139,13 +124,54 @@ class Node:
         return f"[A: {action_str}  W/V: {self._wins}/{self._visits} U: {len(self._unexplored)}]"
 
     def tree_to_string(self, indent: int) -> str:
+        """Returns a string representation of the tree.
+
+        Args:
+            indent: an integer representing the number of indents to use.
+        """
         string = self.indent_string(indent) + str(self)
         for child in self._children:
             string += child.tree_to_string(indent + 1)
         return string
-    
+
     def indent_string(self, indent: int) -> str:
+        """Helper method for tree_to_string."""
         string = "\n"
         for _ in range(1, indent + 1):
             string += "| "
         return string
+
+    @property
+    def wins(self):
+        """Property definition for _wins."""
+        return self._wins
+
+    @property
+    def visits(self):
+        """Property definition for _visits."""
+        return self._visits
+
+    @property
+    def unexplored(self):
+        """Property definition for _unexplored."""
+        return self._unexplored
+
+    @property
+    def state(self):
+        """Property definition for _state."""
+        return self._state
+
+    @property
+    def children(self):
+        """Property definition for _children."""
+        return self._children
+
+    @property
+    def parent(self):
+        """Property definition for _parent."""
+        return self._parent
+
+    @property
+    def action(self):
+        """Property definition for _action."""
+        return self._action

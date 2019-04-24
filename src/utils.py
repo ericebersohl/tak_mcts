@@ -8,7 +8,7 @@ from collections import deque
 from itertools import permutations
 
 from .enums import Color, Piece
-from .types import State, Action, Move, Place
+from .types import State, Action, Place
 
 def split_stack(stack: List, num_removed: int) -> Tuple[List, List]:
     """Splits a list into two sub-lists.
@@ -212,8 +212,13 @@ def print_state(state: State) -> None:
         )
 
 def get_action_string(action: Action) -> str:
+    """Returns a string representation of an action.
+
+    Args:
+        action: the action to be represented.
+    """
     if isinstance(action, Place):
         return f"Place ({action.coord[0]}, {action.coord[1]}): {action.piece.value['str']}"
-    else:
-        return (f"Move ({action.start_coord[0]}, {action.start_coord[1]})->("
-                f"{action.end_coord[0]}, {action.end_coord[1]}): {action.drop_list}")
+
+    return (f"Move ({action.start_coord[0]}, {action.start_coord[1]})->("
+            f"{action.end_coord[0]}, {action.end_coord[1]}): {action.drop_list}")
