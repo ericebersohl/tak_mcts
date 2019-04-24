@@ -48,3 +48,15 @@ class State(NamedTuple):
     board: List[List[List[Piece]]]
 
 Action = Union[Move, Place]
+
+default_state = State(
+    to_move = Color.BLACK,
+    black_stones = 15,
+    white_stones = 15,
+    board = [
+        [[], [], [], []],
+        [[], [], [], []],
+        [[], [], [], []],
+        [[], [], [], []],
+    ]
+)
