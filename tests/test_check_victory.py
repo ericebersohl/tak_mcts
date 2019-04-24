@@ -1,5 +1,5 @@
-import unittest
 import env
+import unittest
 
 from src.game import check_victory
 from src.types import State

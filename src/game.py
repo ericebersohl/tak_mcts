@@ -4,24 +4,21 @@ This module contains five functions:
     validate_action(state, action) -> bool
     get_next_state(state, action) -> State
     get_actions(state) -> List[Action]
-    check_victory(state) -> Tuple[bool, Union[Color, str]]
-    simulate(state) -> bool
+    check_victory(state) -> Union[None, Tuple[float, float]]
+    simulate(state) -> Tuple[float, float]
 
     Validate_action returns true if the proposed action is valid for the given state.
     Get_next_state returns the new (immutable) state that results from applying the passed action
     to the passed state.  Get_actions returns a list of all possible actions for a given state.
-    Check_victory returns a bool that is True if the game is over and either a Color to designate
-    the winner or the string 'Draw' to designate a draw.  Simulate runs a game from the current
-    state to an end state choosing all actions randomly.  This is used for the standard
-    implementation of a Monte-Carlo Tree Search algorithm.
+    Check_victory if the state is terminal, returns a tuple indicating which player won.
+    Simulate runs a game from the current state to an end state choosing all actions randomly.
+    This is used for the standard implementation of a Monte-Carlo Tree Search algorithm.
 """
-import copy
-import random
 from typing import List, Union, Tuple
 
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
-from .utils import split_stack, get_drop_lists, get_path, print_state
+from .utils import split_stack, get_drop_lists, get_path
 
 def validate_action(state: State, action: Action, debug: bool = False) -> bool:
     """Validates proposed action for the given state.
@@ -63,7 +60,7 @@ def validate_action(state: State, action: Action, debug: bool = False) -> bool:
         # player has control
         if not start_square or start_square[-1].value['color'] != state.to_move:
             if debug:
-                print(f'Player does not have control of ( {row_s} , {col_s} ).')
+                print(f'Player {state.to_move.value} does not have control of ({row_s}, {col_s}).')
             return False
 
         # stack size limit
@@ -337,6 +334,7 @@ def check_victory(state: State) -> Union[None, Tuple[float, float]]:
             if not board[row][col]:
                 open_squares += 1
 
+    # count flat pieces
     if state.white_stones < 1 or state.black_stones < 1 or open_squares == 0:
         white_flats, black_flats = 0, 0
         for row in range(len(board)):
@@ -364,20 +362,3 @@ def check_victory(state: State) -> Union[None, Tuple[float, float]]:
         return (1.0, 0.0)
 
     return None
-
-def simulate(start_state: State) -> State:
-    """Simulates a game run from the current state to a (random) terminal state.
-
-    Args:
-        state: An immutable State object (NamedTuple) containing board state information.
-
-    Returns:
-        The terminal state reached.
-    """
-    end_state: State = copy.deepcopy(start_state)
-
-    while not check_victory(end_state):
-        end_state = get_next_state(end_state, random.choice(get_actions(end_state)))
-
-    return end_state
-    

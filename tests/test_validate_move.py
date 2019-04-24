@@ -1,5 +1,5 @@
 import unittest
-import env
+import tests.env
 
 from src.enums import Color, Piece
 from src.game import validate_action
