@@ -4,6 +4,7 @@ This module defines a NamedTuple representation of the board state and a NamedTu
 for each kind of action a player may take: either move or place.  Finally, the module defines the
 union type Action for ease of use in other modules.
 """
+from copy import deepcopy
 from typing import List, NamedTuple, Tuple, Union
 from .enums import Color, Piece
 
@@ -49,14 +50,17 @@ class State(NamedTuple):
 
 Action = Union[Move, Place]
 
-default_state = State(
-    to_move = Color.BLACK,
-    black_stones = 15,
-    white_stones = 15,
-    board = [
-        [[], [], [], []],
-        [[], [], [], []],
-        [[], [], [], []],
-        [[], [], [], []],
-    ]
-)
+def get_default_state() -> State:
+    """Returns a copy of the default state."""
+    default_state = State(
+        to_move = Color.BLACK,
+        black_stones = 15,
+        white_stones = 15,
+        board = [
+            [[], [], [], []],
+            [[], [], [], []],
+            [[], [], [], []],
+            [[], [], [], []],
+        ]
+    )
+    return deepcopy(default_state)
