@@ -53,3 +53,12 @@ def default_mcts(root: State, iterations: int) -> Action:
             current_node = current_node.parent
 
     return sorted(root_node.children, key=lambda x: x.visits)[-1].action
+
+def decisive_move_mcts(root: State, iterations: int) -> Action:
+    pass
+
+def weighted_backpropagation_mcts(root: State, iterations: int) -> Action:
+    pass
+
+def multi_simulation_mcts(root: State, iterations: int) -> Action:
+    pass
