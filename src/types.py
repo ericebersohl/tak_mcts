@@ -53,10 +53,10 @@ Action = Union[Move, Place]
 def get_default_state() -> State:
     """Returns a copy of the default state."""
     default_state = State(
-        to_move = Color.BLACK,
-        black_stones = 15,
-        white_stones = 15,
-        board = [
+        to_move=Color.BLACK,
+        black_stones=15,
+        white_stones=15,
+        board=[
             [[], [], [], []],
             [[], [], [], []],
             [[], [], [], []],

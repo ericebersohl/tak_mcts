@@ -18,13 +18,13 @@ Adapted from: http://mcts.ai/code/python.html
 """
 
 from __future__ import annotations  # required in Python 3.7
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Optional
 from math import sqrt, log
 import random
 
 from .types import Action, State
 from .enums import Color
-from .game import get_actions
+from .game import get_actions, get_next_state, check_victory
 from .utils import get_action_string
 
 class Node:
@@ -80,6 +80,23 @@ class Node:
 
         Uses the calculate_uct function on each Node in self._children.
         """
+        best_child: Node = sorted(
+            self._children, key=lambda child: self.calculate_uct(child.wins, child.visits)
+        )[-1]
+        return best_child
+
+    def select_child_decisive(self) -> Node:
+        """Returns the child that leads to immediate victory or, if no such child exists, the child
+        with the highest UCT1 value.
+
+        Uses the calculate_uct function on each Node in self._children.
+        """
+        for child in self._children:
+            decisive: Optional[Tuple] = check_victory(get_next_state(self._state, child.action))
+            if (decisive == (1.0, 0.0) and self._state.to_move == Color.BLACK or
+                    decisive == (0.0, 1.0) and self._state.to_move == Color.WHITE):
+                return child
+
         best_child: Node = sorted(
             self._children, key=lambda child: self.calculate_uct(child.wins, child.visits)
         )[-1]

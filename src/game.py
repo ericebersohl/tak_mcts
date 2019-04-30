@@ -15,6 +15,7 @@ This module contains five functions:
     This is used for the standard implementation of a Monte-Carlo Tree Search algorithm.
 """
 from typing import List, Union, Tuple
+from copy import deepcopy
 
 from .types import Action, Move, Place, State
 from .enums import Piece, Color
@@ -171,7 +172,7 @@ def validate_action(state: State, action: Action, debug: bool = False) -> bool:
 
     return True
 
-def get_next_state(state: State, action: Action) -> State:
+def get_next_state(passed_state: State, action: Action) -> State:
     """
     Returns the State that results from applying the passed action to the passed State.
 
@@ -190,6 +191,8 @@ def get_next_state(state: State, action: Action) -> State:
     Raises:
         RuntimeError: Occurs when an invalid action is passed to the function.
     """
+    state = deepcopy(passed_state)
+
     if not validate_action(state, action):
         raise RuntimeError('Action failed validation.')
 
