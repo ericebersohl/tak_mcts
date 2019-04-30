@@ -1,5 +1,5 @@
 from src.types import State, get_default_state
-from src.search import default_mcts, decisive_move_mcts
+from src.search import default_mcts, decisive_move_mcts, multi_simulation_mcts
 from src.enums import Color
 from src.game import check_victory, get_next_state
 from src.utils import print_state, get_action_string
@@ -12,7 +12,7 @@ def play_game():
         if state.to_move == Color.BLACK:
             action = default_mcts(state, 1000)
         else:
-            action = decisive_move_mcts(state, 1000)
+            action = multi_simulation_mcts(state, 1000)
         print(get_action_string(action))
         state = get_next_state(state, action)
 

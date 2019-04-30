@@ -116,14 +116,15 @@ class Node:
         self._children.append(new_node)
         return new_node
 
-    def update_node(self, result: Tuple[float, float]) -> None:
+    def update_node(self, result: Tuple[float, float], simulations: int = 1) -> None:
         """Updates the _wins and _visits properties of the node.
 
         Args:
             result: a tuple of floats in range [0.0, 1.0] representing the result of a simulated
             game.
+            simulations: an int indicating how many simulations are being updated.
         """
-        self._visits += 1
+        self._visits += simulations
         if self._state.to_move == Color.BLACK:
             self._wins += result[0]
         else:

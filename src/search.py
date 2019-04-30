@@ -5,7 +5,7 @@ TODO: add more info about what an mcts is.
 There is currently only one version of MCTS which is the default.
 """
 import random
-import copy
+from copy import deepcopy
 
 from .node import Node
 from .types import State, Action
@@ -22,7 +22,7 @@ def default_mcts(root: State, iterations: int) -> Action:
 
     for _ in range(iterations):
         current_node: Node = root_node
-        state = copy.deepcopy(root_node.state)
+        state = deepcopy(root_node.state)
 
         # Select
         while not current_node.unexplored and current_node.children:  # fully expanded, non-terminal
@@ -69,7 +69,7 @@ def decisive_move_mcts(root: State, iterations: int) -> Action:
 
     for _ in range(iterations):
         current_node: Node = root_node
-        state: State = copy.deepcopy(root_node.state)
+        state: State = deepcopy(root_node.state)
 
         # Select
         while not current_node.unexplored and current_node.children:
@@ -105,5 +105,49 @@ def decisive_move_mcts(root: State, iterations: int) -> Action:
 def weighted_backpropagation_mcts(root: State, iterations: int) -> Action:
     pass
 
-def multi_simulation_mcts(root: State, iterations: int) -> Action:
-    pass
+def multi_simulation_mcts(root: State, iterations: int, leaf_simulations: int) -> Action:
+    """Returns the most visited action from a MCTS with the given number of iterations.
+    
+    Args:
+        root: the State from which the search starts.
+        iterations: an int representing the number of iterations to perform.
+        leaf_simulations: the number of simulations to run each time a new node is added to the
+        tree.
+    """
+    root_node: Node = Node(action=None, state=root, parent=None)
+
+    for _ in range(iterations):
+        current_node: Node = root_node
+        state = deepcopy(root_node.state)
+
+        # Select
+        while not current_node.unexplored and current_node.children:
+            current_node = current_node.select_child()
+            state = get_next_state(state, current_node.action)
+        
+        # Expand
+        if current_node.unexplored:
+            action = current_node.get_random_action()
+            state = get_next_state(state, action)
+            current_node = current_node.add_child(action, state)
+        
+        # Simulate
+        result = (0.0, 0.0)
+        for _ in range(leaf_simulations):
+            sim_state = deepcopy(state)
+            while check_victory(sim_state) is None:
+                sim_state = get_next_state(sim_state, random.choice(get_actions(sim_state)))
+            
+            if check_victory(sim_state) == (1.0, 0.0):
+                result = (result[0] + 1.0, result[1])
+            elif check_victory(sim_state) == (0.0, 1.0):
+                result = (result[0], result[1] + 1.0)
+            else:
+                result = (result[0] + 0.5, result[1] + 0.5)
+
+        # Backpropagate
+        while current_node is not None:
+            current_node.update_node(result, leaf_simulations)
+            current_node = current_node.parent
+
+    return sorted(root_node.children, key=lambda x: x.visits)[-1].action
