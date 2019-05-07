@@ -2,6 +2,7 @@ from typing import Tuple, List
 from statistics import mean
 import csv
 import random
+from datetime import datetime, timedelta
 
 from src.types import State, get_default_state
 from src.search import default_mcts, decisive_move_mcts, multi_simulation_mcts
@@ -16,9 +17,9 @@ def play_game(color: Color, weight: float) -> Tuple[float, int, float]:
     state = get_default_state(color)
     while not check_victory(state):
         if state.to_move == Color.BLACK:
-            action = default_mcts(state, 100, weight)
+            action = default_mcts(state, 10, weight)
         else:
-            action = default_mcts(state, 100, 2.0)
+            action = default_mcts(state, 10, 2.0)
         depth += 1
         branch.append(len(get_actions(state)))
         state = get_next_state(state, action)
@@ -30,25 +31,45 @@ def play_game(color: Color, weight: float) -> Tuple[float, int, float]:
         return (0.0, depth, mean(branch))
     return (0.5, depth, mean(branch))
 
-# select random weight (0, 10]
-weight = random.uniform(0.0, 10.0)
-starting_player = random.choice([Color.BLACK, Color.WHITE])
+def test_weight_factor(sims: int):
+    # select random weight (0, 10]
+    weight = random.uniform(0.0, 10.0)
+    starting_player: Color = Color.BLACK
 
-points = []
-depth = []
-branch = []
+    points = []
+    depth = []
+    branch = []
 
-# play 20 games
-for _ in range(1):
-    result = play_game(starting_player, weight)
-    points.append(result[0])
-    depth.append(result[1])
-    branch.append(result[2])
+    # play 20 games
+    for game in range(sims):
+        print(f'{game}, ', end='')
+        if game%2 == 0:
+            starting_player == Color.BLACK
+        else:
+            starting_player == Color.WHITE
 
-line = [sum(points), weight, mean(depth), mean(branch)]
+        result = play_game(starting_player, weight)
+        points.append(result[0])
+        depth.append(result[1])
+        branch.append(result[2])
 
-# output results to csv
-with open ('./output/weight.csv', mode='a') as weight_file:
-    weight_writer = csv.writer(weight_file, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"')
-    weight_writer.writerow(line)
-    print("writing:",line)
+    line = [sum(points), weight, mean(depth), mean(branch)]
+
+    # output results to csv
+    with open ('./output/weight.csv', mode='a') as weight_file:
+        weight_writer = csv.writer(weight_file, delimiter=',', quoting=csv.QUOTE_MINIMAL, quotechar='"')
+        weight_writer.writerow(line)
+        print("writing:",line)
+
+n = 3
+start = datetime.now()
+test_weight_factor(n)
+end = datetime.now()
+
+diff: timedelta = end - start
+days = diff.days
+hours = diff.seconds // 3600
+minutes = (diff.seconds // 3600) % 60
+seconds = ((diff.seconds // 3600) % 60) % 60
+
+print(f"Ran {n} simulations in {days} days, {hours} hours, {minutes} minutes, {seconds} seconds.")
