@@ -25,55 +25,20 @@ import random
 from .types import Action, State
 from .enums import Color
 from .game import get_actions, get_next_state, check_victory
-from .utils import get_action_string
+from .utils import get_action_string, calculate_uct
 
 class Node:
     """Represents a node in a Monte-Carlo Tree Search."""
-    def __init__(self, action: Union[Action, None], state: State, parent: Union[Node, None]):
+    def __init__(self, action: Union[Action, None], state: State, parent: Union[Node, None], weight: float = 2.0):
         """Initializes a node.  Gets a list of possible actions from this state."""
         self._action = action
         self._state = state
         self._parent = parent
         self._children: List[Node] = []
-        self._visits = 0.0
-        self._wins = 0.0
+        self._visits: int = 0
+        self._wins: float = 0
+        self._weight = weight
         self._unexplored: List[Action] = get_actions(self._state)
-
-    def calculate_uct(self, child_wins: int, child_visits: int, weight: float = 1.0) -> float:
-        """Returns a float that represents its attractiveness for MCTS exploration
-
-        Note that if the node's _visits property is 0, float("inf") is returned.
-
-        Args:
-            child_wins: the number of times the child node (or one of its children) has won.
-            child_visits: the total number of visits to the child node.
-            weight: an optional additional weighting factor
-
-        Raises:
-            ValueError:
-                child_visits < 1
-                self._visits < child_visits
-                child_wins > child_visits
-        """
-        if child_visits < 0:
-            raise ValueError(f"child_visits cannot be less than zero: {child_visits}.")
-
-        if self._visits < child_visits:
-            raise ValueError(f"child_visits cannot be greater than parent._visits:\
-                               {child_visits} > {self._visits}.")
-
-        if child_wins > child_visits:
-            raise ValueError(f"child_visits cannot be greater than child_wins:\
-                               {child_visits} > {child_wins}")
-
-        if child_visits == 0:
-            return float("inf")
-
-        win_loss = child_wins / child_visits
-        weight = 2 * weight
-        uct = sqrt(2*log(self._visits)/child_visits)
-
-        return win_loss + weight * uct
 
     def select_child(self) -> Node:
         """Returns the child node with the highest UCT weight.
@@ -81,7 +46,7 @@ class Node:
         Uses the calculate_uct function on each Node in self._children.
         """
         best_child: Node = sorted(
-            self._children, key=lambda child: self.calculate_uct(child.wins, child.visits)
+            self._children, key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
         )[-1]
         return best_child
 
@@ -98,7 +63,7 @@ class Node:
                 return child
 
         best_child: Node = sorted(
-            self._children, key=lambda child: self.calculate_uct(child.wins, child.visits)
+            self._children, key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
         )[-1]
         return best_child
 
@@ -111,7 +76,7 @@ class Node:
         Returns:
             The new node that is created and added to the list of children.
         """
-        new_node = Node(add_action, add_state, self)
+        new_node = Node(add_action, add_state, self, self._weight)
         self._unexplored.remove(add_action)
         self._children.append(new_node)
         return new_node

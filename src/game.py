@@ -264,7 +264,7 @@ def get_actions(state: State) -> List[Action]:
     action_list: List[Action] = []
 
     if state.white_stones == 0 or state.black_stones == 0:
-        raise RuntimeError(f"get_actions called when a player has no stones {state}.")
+        return []
 
     # append all possible actions
     board = state.board

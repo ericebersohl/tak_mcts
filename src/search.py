@@ -11,14 +11,14 @@ from .node import Node
 from .types import State, Action
 from .game import get_next_state, check_victory, get_actions
 
-def default_mcts(root: State, iterations: int) -> Action:
+def default_mcts(root: State, iterations: int, weight_factor: float = 2.0) -> Action:
     """Returns the most visited action from a MCTS with the given number of iterations.
 
     Args:
         root: a State NamedTuple that represents the current game state from which to simulate.
         iterations: the number of iterations to run before selecting an action.
     """
-    root_node: Node = Node(action=None, state=root, parent=None)
+    root_node: Node = Node(action=None, state=root, parent=None, weight=weight_factor)
 
     for _ in range(iterations):
         current_node: Node = root_node

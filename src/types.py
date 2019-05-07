@@ -50,10 +50,10 @@ class State(NamedTuple):
 
 Action = Union[Move, Place]
 
-def get_default_state() -> State:
+def get_default_state(color: Color) -> State:
     """Returns a copy of the default state."""
     default_state = State(
-        to_move=Color.BLACK,
+        to_move=color,
         black_stones=15,
         white_stones=15,
         board=[

@@ -6,6 +6,7 @@ become unbearably long.
 from typing import List, Tuple
 from collections import deque
 from itertools import permutations
+from math import sqrt, log
 
 from .enums import Color, Piece
 from .types import State, Action, Place
@@ -222,3 +223,40 @@ def get_action_string(action: Action) -> str:
 
     return (f"Move ({action.start_coord[0]}, {action.start_coord[1]})->("
             f"{action.end_coord[0]}, {action.end_coord[1]}): {action.drop_list}")
+
+def calculate_uct(child_wins: int, child_visits: int, parent_visits: int, weight: float = 2.0) -> float:
+    """Returns a float that represents its attractiveness for MCTS exploration
+
+    Note that if the node's _visits property is 0, float("inf") is returned.
+
+    Args:
+        child_wins: the number of times the child node (or one of its children) has won.
+        child_visits: the total number of visits to the child node.
+        parent_visits: the number of times the parent node has been visited
+        weight: an optional additional weighting factor
+
+    Raises:
+        ValueError:
+            child_visits < 1 or parent_visits < 1
+            self._visits < child_visits
+            child_wins > child_visits
+    """
+    if child_visits < 1:
+        raise ValueError(f"child_visits cannot be < 0: {child_visits}")
+    
+    if parent_visits < 1:
+        raise ValueError(f"parent_visits cannot be < 0: {parent_visits}")
+
+    if parent_visits < child_visits:
+        raise ValueError(f"parent_visits less than child visits: {parent_visits}<{child_visits}")
+
+    if child_wins > child_visits:
+        raise ValueError(f"child_wins > child_visits: {child_wins}>{child_visits}")
+    
+    if child_visits == 0:
+        return float("inf")
+
+    win_loss = child_wins / child_visits
+    uct = sqrt(2*log(parent_visits)/child_visits)
+
+    return win_loss + weight * uct
