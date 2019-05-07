@@ -17,7 +17,7 @@ The Node class contains several methods:
 Adapted from: http://mcts.ai/code/python.html
 """
 
-from __future__ import annotations  # required in Python 3.7
+# from __future__ import annotations  # required in Python 3.7
 from typing import Union, List, Tuple, Optional
 from math import sqrt, log
 import random
@@ -29,28 +29,28 @@ from .utils import get_action_string, calculate_uct
 
 class Node:
     """Represents a node in a Monte-Carlo Tree Search."""
-    def __init__(self, action: Union[Action, None], state: State, parent: Union[Node, None], weight: float = 2.0):
+    def __init__(self, action: Union[Action, None], state: State, parent, weight: float = 2.0):
         """Initializes a node.  Gets a list of possible actions from this state."""
         self._action = action
         self._state = state
         self._parent = parent
-        self._children: List[Node] = []
+        self._children: List = []
         self._visits: int = 0
         self._wins: float = 0
         self._weight = weight
         self._unexplored: List[Action] = get_actions(self._state)
 
-    def select_child(self) -> Node:
+    def select_child(self):
         """Returns the child node with the highest UCT weight.
 
         Uses the calculate_uct function on each Node in self._children.
         """
-        best_child: Node = sorted(
+        best_child = sorted(
             self._children, key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
         )[-1]
         return best_child
 
-    def select_child_decisive(self) -> Node:
+    def select_child_decisive(self):
         """Returns the child that leads to immediate victory or, if no such child exists, the child
         with the highest UCT1 value.
 
@@ -62,12 +62,12 @@ class Node:
                     decisive == (0.0, 1.0) and self._state.to_move == Color.WHITE):
                 return child
 
-        best_child: Node = sorted(
+        best_child = sorted(
             self._children, key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
         )[-1]
         return best_child
 
-    def add_child(self, add_action: Action, add_state: State) -> Node:
+    def add_child(self, add_action: Action, add_state: State):
         """Creates and returns a new node taking an action from _unexplored.
 
         Args:
