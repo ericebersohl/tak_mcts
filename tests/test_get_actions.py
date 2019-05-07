@@ -86,8 +86,7 @@ class TestGetActions(unittest.TestCase):
         ]
         self.assertEqual(len(expected_2), len(get_actions(self.test_state_1)))
 
-        with self.assertRaises(RuntimeError):
-            get_actions(self.error_state)
+        self.assertEqual(get_actions(self.error_state), [])
 
     def setUp(self):
         self.blank_state = State(
