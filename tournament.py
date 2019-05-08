@@ -1,6 +1,7 @@
 import csv
 from typing import List, Tuple, Optional
 from random import choice
+from datetime import datetime
 
 from src.game import get_next_state, check_victory
 from src.types import get_default_state, State
@@ -38,5 +39,26 @@ def play_game(black, white) -> Optional[Tuple[float, float]]:
 
     return check_victory(state)
 
+# courtesy of https://gist.github.com/thatalextaylor/7408395
+def pretty_time_delta(seconds):
+    seconds = int(seconds)
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    if days > 0:
+        return '%dd%dh%dm%ds' % (days, hours, minutes, seconds)
+    elif hours > 0:
+        return '%dh%dm%ds' % (hours, minutes, seconds)
+    elif minutes > 0:
+        return '%dm%ds' % (minutes, seconds)
+    else:
+        return '%ds' % (seconds,)
 
-tournament(functions)
+sims = 0
+while True:
+    start = datetime.now()
+    tournament(functions)
+    end = datetime.now()
+    sims+=1
+    runtime = pretty_time_delta((end-start).total_seconds())
+    print(f'Tournament {sims} complete.  Runtime: {runtime}.')
