@@ -103,9 +103,43 @@ def decisive_move_mcts(root: State, iterations: int) -> Action:
 
 
 def weighted_backpropagation_mcts(root: State, iterations: int) -> Action:
-    pass
+    """"""
+    root_node: Node = Node(action=None, state=root, parent=None)
 
-def multi_simulation_mcts(root: State, iterations: int, leaf_simulations: int) -> Action:
+    for _ in range(iterations):
+        current_node: Node = root_node
+        state = deepcopy(root_node.state)
+        depth = 1
+
+        while not current_node.unexplored and current_node.children:
+            current_node = current_node.select_child()
+            depth += 1
+            state = get_next_state(state, current_node.action)
+        
+        if current_node.unexplored:
+            action = current_node.get_random_action()
+            state = get_next_state(state, action)
+            current_node = current_node.add_child(action, state)
+            depth += 1
+        
+        while check_victory(state) is None:
+            state = get_next_state(state, random.choice(get_actions(state)))
+
+        weight_factor = 2**(depth-1)
+        if check_victory(state) == (1.0, 0.0):
+            result = (1.0 * weight_factor, 0.0)
+        elif check_victory(state) == (0.0, 1.0):
+            result = (0.0, 1.0 * weight_factor)
+        else:
+            result = (0.5 * weight_factor, 0.5 * weight_factor)
+
+        while current_node is not None:
+            current_node.update_node(result, weight_factor)
+            current_node = current_node.parent
+    
+    return sorted(root_node.children, key=lambda x: x.visits)[-1].action
+
+def multi_simulation_mcts(root: State, iterations: int, leaf_simulations: int = 3) -> Action:
     """Returns the most visited action from a MCTS with the given number of iterations.
     
     Args:
@@ -116,7 +150,7 @@ def multi_simulation_mcts(root: State, iterations: int, leaf_simulations: int) -
     """
     root_node: Node = Node(action=None, state=root, parent=None)
 
-    for _ in range(iterations):
+    for _ in range(iterations//leaf_simulations):
         current_node: Node = root_node
         state = deepcopy(root_node.state)
 
