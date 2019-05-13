@@ -17,9 +17,7 @@ The Node class contains several methods:
 Adapted from: http://mcts.ai/code/python.html
 """
 
-# from __future__ import annotations  # required in Python 3.7
 from typing import Union, List, Tuple, Optional
-from math import sqrt, log
 import random
 
 from .types import Action, State
@@ -46,7 +44,8 @@ class Node:
         Uses the calculate_uct function on each Node in self._children.
         """
         best_child = sorted(
-            self._children, key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
+            self._children,
+            key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
         )[-1]
         return best_child
 
@@ -63,7 +62,8 @@ class Node:
                 return child
 
         best_child = sorted(
-            self._children, key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
+            self._children,
+            key=lambda child: calculate_uct(child.wins, child.visits, self._visits, self._weight)
         )[-1]
         return best_child
 

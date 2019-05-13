@@ -11,6 +11,24 @@ from math import sqrt, log
 from .enums import Color, Piece
 from .types import State, Action, Place
 
+def pretty_time_delta(seconds):
+    """Prints a number of seconds in a terse, human-readable format.
+
+    Adapted from: https://gist.github.com/thatalextaylor/7408395
+    """
+    seconds = int(seconds)
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+
+    if days > 0:
+        return '%dd%dh%dm%ds' % (days, hours, minutes, seconds)
+    if hours > 0:
+        return '%dh%dm%ds' % (hours, minutes, seconds)
+    if minutes > 0:
+        return '%dm%ds' % (minutes, seconds)
+    return '%ds' % (seconds,)
+
 def split_stack(stack: List, num_removed: int) -> Tuple[List, List]:
     """Splits a list into two sub-lists.
 
@@ -225,7 +243,8 @@ def get_action_string(action: Action) -> str:
     return (f"Move ({action.start_coord[0]}, {action.start_coord[1]})->("
             f"{action.end_coord[0]}, {action.end_coord[1]}): {action.drop_list}")
 
-def calculate_uct(child_wins: int, child_visits: int, parent_visits: int, weight: float = 2.0) -> float:
+def calculate_uct(child_wins: int, child_visits: int, parent_visits: int, weight: float = 2.0)\
+    -> float:
     """Returns a float that represents its attractiveness for MCTS exploration
 
     Note that if the node's _visits property is 0, float("inf") is returned.
@@ -244,7 +263,7 @@ def calculate_uct(child_wins: int, child_visits: int, parent_visits: int, weight
     """
     if child_visits < 1:
         raise ValueError(f"child_visits cannot be < 0: {child_visits}")
-    
+
     if parent_visits < 1:
         raise ValueError(f"parent_visits cannot be < 0: {parent_visits}")
 
@@ -253,7 +272,7 @@ def calculate_uct(child_wins: int, child_visits: int, parent_visits: int, weight
 
     if child_wins > child_visits:
         raise ValueError(f"child_wins > child_visits: {child_wins}>{child_visits}")
-    
+
     if child_visits == 0:
         return float("inf")
 

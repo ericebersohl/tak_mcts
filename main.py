@@ -1,3 +1,12 @@
+"""
+Defines functions to the mcts enhancements against each other and print the results.
+
+The enhancement functions are defined in src/search.py:
+    - default_mcts
+    - decisive_move_mcts
+    - weighted_backpropagation_mcts
+    - multi_simulation_mcts
+"""
 from typing import Optional, Tuple
 
 from src.types import get_default_state
@@ -7,15 +16,16 @@ from src.utils import print_state
 from src.search import default_mcts, decisive_move_mcts,\
     weighted_backpropagation_mcts, multi_simulation_mcts
 
-def play_game(color: Color, black_enh, white_enh, iterations: int = 300) -> Optional[Tuple[float, float]]:
+def play_game(color: Color, black_enh, white_enh, iterations: int = 300)\
+    -> Optional[Tuple[float, float]]:
     """Plays a game using the given MCTS enhancement functions.
-    
+
     Args:
         color: the Color enum that indicates which player goes first.
         black_enh: a function from search.py that defines the black player's mcts algorithm.
         white_enh: a function from search.py that defines the white player's mcts algorithm.
         iterations: an int defining how many iterations should run for each MCTS search.
-    
+
     Returns:
         A tuple of the form: (BlackScore, WhiteScore).  The range for each score is [0.0, 1.0] where
         1.0 indicates a win, 0.0 indicates a loss, and 0.5 indicates a draw.
