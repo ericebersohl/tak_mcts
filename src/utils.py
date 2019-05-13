@@ -211,6 +211,7 @@ def print_state(state: State) -> None:
             f'{get_list_str(state.board[row][2])} '
             f'{get_list_str(state.board[row][3])}'
         )
+    print()
 
 def get_action_string(action: Action) -> str:
     """Returns a string representation of an action.
