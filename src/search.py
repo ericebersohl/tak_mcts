@@ -1,8 +1,9 @@
 """Functions for Monte-Carlo Tree Searches.
-
-TODO: add more info about what an mcts is.
-
-There is currently only one version of MCTS which is the default.
+This module contains four version of MCTS:
+    - Default (using UCB1)
+    - Decisive Move (changes the select_child method to check for victory)
+    - Weighted Backpropagation (weights deeper nodes more heavily)
+    - Multiple Leaf Simulation (simulates leaf nodes more than one time)
 """
 import random
 from copy import deepcopy
